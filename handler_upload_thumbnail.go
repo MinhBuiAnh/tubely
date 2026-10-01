@@ -49,12 +49,6 @@ func (cfg *apiConfig) handlerUploadThumbnail(w http.ResponseWriter, r *http.Requ
 	}
 	defer file.Close()
 
-	mediaType := header.Header.Get("Content-Type")
-	if mediaType == "" {
-		respondWithError(w, http.StatusBadGateway, "Couldn't find the Content-Type for thumbnail", nil)
-		return
-	}
-
 	metadata, err := cfg.db.GetVideo(videoID)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't find video metadata with the given user ID", err)
@@ -64,7 +58,12 @@ func (cfg *apiConfig) handlerUploadThumbnail(w http.ResponseWriter, r *http.Requ
 		respondWithError(w, http.StatusUnauthorized, "User is not allowed to update the video", nil)
 		return
 	}
-
+	
+	mediaType := header.Header.Get("Content-Type")
+	if mediaType == "" {
+		respondWithError(w, http.StatusBadGateway, "Couldn't find the Content-Type for thumbnail", nil)
+		return
+	}
 	imageType, _, err := mime.ParseMediaType(mediaType)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "Couldn't parse the media type", err)
